@@ -24,6 +24,7 @@ class UserSafe(LDAPBaseModel):
     sn: str = Field("", description=("Surname"))
     userClass: list[str] = Field([], description=("User class"))
     roles: list = Field([], description=("Roles the user is a member of"))
+    groups: list = Field([], description=("Groups the user is a member of"))
     uidNumber: int = Field(0, description=("User ID number"))
     gidNumber: int = Field(0, description=("Group ID number"))
     active: bool = Field(False, description=("Active user"))
@@ -80,13 +81,14 @@ class UserSafe(LDAPBaseModel):
             uidNumber=65535,
             gidNumber=65535,
             roles=[],
+            groups=[],
             active=False,
             admin=False,
         )
         return user
 
     @classmethod
-    def from_entry(cls, entry) -> UserSafe:
+    def from_entry(cls, entry, groups=[]) -> UserSafe:
         active = False
         admin = False
         userClass = entry.get("userClass", [])
@@ -104,6 +106,7 @@ class UserSafe(LDAPBaseModel):
             uid=entry["uid"][0],
             userClass=userClass,
             roles=entry.get("memberOf", []),
+            groups=groups,
             uidNumber=entry["uidNumber"][0],
             gidNumber=entry["gidNumber"][0],
             active=active,
@@ -157,21 +160,34 @@ class UserSafe(LDAPBaseModel):
     @classmethod
     async def get_by_uid(cls, uid: int):
         client = get_client()
-        try:
-            async with client.connect(is_async=True) as conn:
+        async with client.connect(is_async=True) as conn:
+            try:
                 res = await conn.search(
                     config.ldap.userBase,
                     LDAPSearchScope.SUB,
                     f"(&(objectClass=person)(uidNumber={uid}))",
                     ["*", config.ldap.userMemberAttr],
                 )
-        except errors.AuthenticationError:
-            raise HTTPException(status_code=403, detail="Failed to login")
-        if len(res) < 1:
-            raise HTTPException(status_code=404, detail="No such user")
-        if len(res) > 1:
-            raise HTTPException(status_code=409, detail="Multiple users found")
+            except errors.AuthenticationError:
+                raise HTTPException(status_code=403, detail="Failed to login")
+            if len(res) < 1:
+                raise HTTPException(status_code=404, detail="No such user")
+            if len(res) > 1:
+                raise HTTPException(status_code=409, detail="Multiple users found")
         user = cls.from_entry(res[0])
+        _, domain = res[0].email.split("@")
+        classes = class2filter(config.ldap.roleClasses)
+        dn = f"{config.ldap.domainDN.format(domain)},{config.ldap.roleBase}"
+        async with client.connect(is_async=True) as conn:
+            try:
+                res = await conn.search(
+                    dn,
+                    LDAPSearchScope.SUB,
+                    f"(&{classes}(memberUid={uid}))",
+                )
+            except errors.AuthenticationError:
+                raise HTTPException(status_code=403, detail="Failed to login")
+        user.groups = [g["gidNumber"][0] for g in res]
         return user
 
     @classmethod
