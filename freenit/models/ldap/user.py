@@ -47,6 +47,22 @@ class UserSafe(LDAPBaseModel):
         data = res[0]
         return data
 
+    async def _fill_groups(self):
+        _, domain = self.email.split('@')
+        classes = class2filter(config.ldap.groupClasses)
+        dn = f"{config.ldap.domainDN.format(domain)},{config.ldap.roleBase}"
+        client = get_client()
+        async with client.connect(is_async=True) as conn:
+            try:
+                res = await conn.search(
+                    dn,
+                    LDAPSearchScope.SUB,
+                    f"(&{classes}(memberUid={self.uidNumber}))",
+                )
+            except errors.AuthenticationError:
+                raise HTTPException(status_code=403, detail="Failed to login")
+        self.groups = [g["gidNumber"][0] for g in res]
+
     @classmethod
     async def login(cls, credentials):
         data = await cls._login(credentials)
@@ -131,6 +147,7 @@ class UserSafe(LDAPBaseModel):
         data = []
         for udata in res:
             user = cls.from_entry(udata)
+            await user._fill_groups()
             data.append(user)
         return data
 
@@ -155,6 +172,7 @@ class UserSafe(LDAPBaseModel):
             raise HTTPException(status_code=409, detail="Multiple users found")
         data = res[0]
         user = cls.from_entry(data)
+        await user._fill_groups()
         return user
 
     @classmethod
@@ -175,19 +193,7 @@ class UserSafe(LDAPBaseModel):
             if len(res) > 1:
                 raise HTTPException(status_code=409, detail="Multiple users found")
         user = cls.from_entry(res[0])
-        _, domain = res[0].email.split("@")
-        classes = class2filter(config.ldap.roleClasses)
-        dn = f"{config.ldap.domainDN.format(domain)},{config.ldap.roleBase}"
-        async with client.connect(is_async=True) as conn:
-            try:
-                res = await conn.search(
-                    dn,
-                    LDAPSearchScope.SUB,
-                    f"(&{classes}(memberUid={uid}))",
-                )
-            except errors.AuthenticationError:
-                raise HTTPException(status_code=403, detail="Failed to login")
-        user.groups = [g["gidNumber"][0] for g in res]
+        await user._fill_groups()
         return user
 
     @classmethod
@@ -210,6 +216,7 @@ class UserSafe(LDAPBaseModel):
         if len(res) > 1:
             raise HTTPException(status_code=409, detail="Multiple users found")
         user = cls.from_entry(res[0])
+        await user._fill_groups()
         return user
 
 
