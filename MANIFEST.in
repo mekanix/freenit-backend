@@ -1,6 +1,0 @@
-include README.md
-include LICENSE
-include name.py
-include pytest.ini
-graft tests
-graft freenit/project

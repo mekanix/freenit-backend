@@ -1,0 +1,29 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ mailing_list.name }} subscribers</h2>
+  </div>
+  <div class="card">
+    <form hx-post="/mailinglists/{{ mailing_list.id }}/subscribers" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+      <button type="submit" class="button primary">Add subscriber</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr auto;">
+      <div class="heading">Email</div>
+      <div class="heading">Actions</div>
+      {% for subscriber in subscribers %}
+      <div class="data">{{ subscriber.email }}</div>
+      <div class="data">
+        <form class="inline-form" hx-post="/mailinglists/{{ mailing_list.id }}/subscribers/{{ subscriber.id }}/delete" hx-target="#main" hx-swap="innerHTML">
+          <button type="submit" class="button error small">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <p><a href="/mailinglists/{{ mailing_list.id }}">Back to list</a></p>
+</div>

@@ -1,0 +1,34 @@
+<div class="container">
+  <div class="header">
+    <h2>Projects</h2>
+  </div>
+  <div class="card">
+    <form hx-post="/projects" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Description
+        <input type="text" name="description">
+      </label>
+      <button type="submit" class="button primary">Create</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr 2fr auto;">
+      <div class="heading">Name</div>
+      <div class="heading">Description</div>
+      <div class="heading">Actions</div>
+      {% for project in projects %}
+      <div class="data"><a href="/projects/{{ project.id }}">{{ project.name }}</a></div>
+      <div class="data">{{ project.description or '' }}</div>
+      <div class="data">
+        <a class="button" href="/projects/{{ project.id }}">Open</a>
+      </div>
+      {% else %}
+      <div class="data" style="grid-column: 1 / 4;">No projects yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

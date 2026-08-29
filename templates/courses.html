@@ -1,0 +1,30 @@
+<div class="container">
+  <div class="header">
+    <h2>Courses</h2>
+  </div>
+  {% if user %}
+  <div class="card">
+    <form hx-post="/courses" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Description
+        <textarea name="description" rows="3"></textarea>
+      </label>
+      <button type="submit" class="button primary">Create course</button>
+    </form>
+  </div>
+  {% endif %}
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr 2fr;">
+      <div class="heading">Name</div>
+      <div class="heading">Description</div>
+      {% for course in courses %}
+      <div class="data"><a href="/courses/{{ course.id }}">{{ course.name }}</a></div>
+      <div class="data">{{ course.description or '-' }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

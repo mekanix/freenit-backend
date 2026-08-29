@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="header">
+    <h2>Mailing lists</h2>
+  </div>
+  <div class="card">
+    <form hx-post="/mailinglists" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Domain
+        <input type="text" name="domain" required>
+      </label>
+      <label>
+        Description
+        <textarea name="description" rows="3"></textarea>
+      </label>
+      <label>
+        <input type="checkbox" name="public" value="true" checked>
+        Public
+      </label>
+      <label>
+        <input type="checkbox" name="archive_enabled" value="true" checked>
+        Archive enabled
+      </label>
+      <label>
+        <input type="checkbox" name="moderation_enabled" value="true">
+        Moderation enabled
+      </label>
+      <button type="submit" class="button primary">Create list</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr 2fr auto;">
+      <div class="heading">Name</div>
+      <div class="heading">Address</div>
+      <div class="heading">Public</div>
+      {% for list in lists %}
+      <div class="data"><a href="/mailinglists/{{ list.id }}">{{ list.name }}</a></div>
+      <div class="data">{{ list.address }}</div>
+      <div class="data">{{ list.public }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <p><a href="/mailinglists/public">Public mailing lists</a></p>
+</div>

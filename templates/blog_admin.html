@@ -1,0 +1,41 @@
+<div class="container">
+  <h2>Blog admin</h2>
+  <div class="card">
+    <form hx-post="/blog/admin" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Title
+        <input type="text" name="title" required>
+      </label>
+      <label>
+        Slug
+        <input type="text" name="slug" required>
+      </label>
+      <label>
+        Content
+        <textarea name="content" rows="10" required></textarea>
+      </label>
+      <label>
+        Tags (comma separated)
+        <input type="text" name="tags">
+      </label>
+      <label>
+        <input type="checkbox" name="published" value="true">
+        Published
+      </label>
+      <button type="submit" class="button primary">Create post</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Posts</h3>
+    <div class="table-grid" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="heading">Title</div>
+      <div class="heading">Slug</div>
+      <div class="heading">Published</div>
+      {% for post in posts %}
+      <div class="data">{{ post.title }}</div>
+      <div class="data"><a href="/blog/{{ post.slug }}">{{ post.slug }}</a></div>
+      <div class="data">{{ post.published }}</div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

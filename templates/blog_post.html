@@ -1,0 +1,13 @@
+<div class="container">
+  <article class="card">
+    <h1>{{ post.title }}</h1>
+    <p class="meta">
+      {{ post.date.strftime('%x') if post.date else (post.created_at.strftime('%x') if post.created_at else '') }}
+      {% if post.tags %}
+      &mdash;
+      {% for tag in post.tags %}<a class="tag" href="/blog/tags/{{ tag }}">#{{ tag }}</a>{% if not loop.last %} {% endif %}{% endfor %}
+      {% endif %}
+    </p>
+    <div>{{ post.content | safe }}</div>
+  </article>
+</div>

@@ -1,0 +1,14 @@
+<div class="container">
+  <h2>Tag: {{ tag_name }}</h2>
+  <div class="posts">
+    {% for post in posts %}
+    <article class="card">
+      <h3><a href="/blog/{{ post.slug }}">{{ post.title }}</a></h3>
+      <p class="meta">{{ post.date.strftime('%x') if post.date else (post.created_at.strftime('%x') if post.created_at else '') }}</p>
+      <p>{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</p>
+    </article>
+    {% else %}
+    <p>No posts for this tag.</p>
+    {% endfor %}
+  </div>
+</div>

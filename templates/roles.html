@@ -1,0 +1,24 @@
+<div class="container">
+  <div class="header">
+    <h2>Roles</h2>
+  </div>
+  <div class="card">
+    <form hx-post="/roles" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <button type="submit" class="button primary">Create role</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr auto;">
+      <div class="heading">Name</div>
+      <div class="heading">Actions</div>
+      {% for role in roles %}
+      <div class="data">{{ role.name }}</div>
+      <div class="data"><a class="button" href="/roles/{{ role.id }}">Details</a></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="card">
+    {% if confirmed %}
+    <h2>Unsubscription confirmed</h2>
+    <p>You have been unsubscribed from {{ mailing_list.name }}.</p>
+    {% else %}
+    <h2>Unsubscribe from {{ mailing_list.name }}</h2>
+    <p class="meta">{{ mailing_list.address }}</p>
+    <form hx-post="/mailinglists/{{ mailing_list.id }}/unsubscribe" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+      <button type="submit" class="button error">Unsubscribe</button>
+    </form>
+    {% endif %}
+  </div>
+</div>

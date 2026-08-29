@@ -1,0 +1,60 @@
+<div class="container">
+  <div class="header">
+    <h2>Git repositories</h2>
+  </div>
+  <div class="card">
+    <form hx-post="/git/repos" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Path
+        <input type="text" name="path" required>
+      </label>
+      <label>
+        Project
+        <select name="project_id">
+          <option value="">None</option>
+          {% for project in projects or [] %}
+          <option value="{{ project.id }}">{{ project.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        Description
+        <textarea name="description" rows="3"></textarea>
+      </label>
+      <label>
+        <input type="checkbox" name="public" value="true">
+        Public
+      </label>
+      <label>
+        Default branch
+        <input type="text" name="default_branch" value="main">
+      </label>
+      <label>
+        <input type="checkbox" name="tests_enabled" value="true">
+        Tests enabled
+      </label>
+      <label>
+        Test command
+        <input type="text" name="test_command">
+      </label>
+      <button type="submit" class="button primary">Create repository</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr 2fr auto;">
+      <div class="heading">Name</div>
+      <div class="heading">Path</div>
+      <div class="heading">Public</div>
+      {% for repo in repos %}
+      <div class="data"><a href="/git/repos/{{ repo.id }}">{{ repo.name }}</a></div>
+      <div class="data">{{ repo.path }}</div>
+      <div class="data">{{ repo.public }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <p><a href="/git/repos/public">Public repositories</a></p>
+</div>

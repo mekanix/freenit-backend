@@ -1,0 +1,35 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ project.name }}</h2>
+  </div>
+  {% if project.description %}
+  <p>{{ project.description }}</p>
+  {% endif %}
+  <div class="card">
+    <h3>Boards</h3>
+    <form hx-post="/projects/{{ project.id }}/boards" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Description
+        <input type="text" name="description">
+      </label>
+      <button type="submit" class="button primary">Create board</button>
+    </form>
+    <div class="table-grid" style="grid-template-columns: 1fr 2fr auto; margin-top: 1rem;">
+      <div class="heading">Name</div>
+      <div class="heading">Description</div>
+      <div class="heading">Actions</div>
+      {% for board in boards %}
+      <div class="data">{{ board.name }}</div>
+      <div class="data">{{ board.description or '' }}</div>
+      <div class="data"><a class="button" href="/projects/{{ project.id }}/boards/{{ board.id }}">Open</a></div>
+      {% else %}
+      <div class="data" style="grid-column: 1 / 4;">No boards yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+  <p><a href="/projects/{{ project.id }}/groups">Project groups</a></p>
+</div>

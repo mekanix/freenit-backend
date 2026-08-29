@@ -1,3 +1,0 @@
----
-devel_packages:
-  - name: "{{ python_prefix }}-sqlite3"

@@ -1,0 +1,19 @@
+<div class="container">
+  <div class="header">
+    <h2>Users</h2>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr 1fr auto auto;">
+      <div class="heading">Email</div>
+      <div class="heading">Full name</div>
+      <div class="heading">Admin</div>
+      <div class="heading">Actions</div>
+      {% for u in users %}
+      <div class="data">{{ u.email }}</div>
+      <div class="data">{{ u.fullname or '' }}</div>
+      <div class="data">{{ u.admin }}</div>
+      <div class="data"><a class="button" href="/users/{{ u.id }}">Details</a></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

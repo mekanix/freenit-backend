@@ -1,0 +1,17 @@
+<div class="container">
+  <div class="header">
+    <h2>Domains</h2>
+  </div>
+  {% if error %}
+  <p class="text-error">{{ error }}</p>
+  {% endif %}
+  <div class="card">
+    <ul>
+      {% for domain in domains %}
+      <li>{{ domain }}</li>
+      {% else %}
+      <li>No domains found.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

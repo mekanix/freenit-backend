@@ -1,0 +1,13 @@
+<div class="container">
+  <div class="card">
+    <h2>{{ script_name }}</h2>
+    {% if active %}
+    <p class="text-success">Active</p>
+    {% endif %}
+    <form hx-post="/mail/sieve/scripts/{{ script_name }}" hx-target="#main" hx-swap="innerHTML">
+      <textarea name="content" rows="20">{{ content }}</textarea>
+      <button type="submit" class="button primary">Save</button>
+    </form>
+  </div>
+  <p><a class="button" href="/mail/sieve/scripts">Back to scripts</a></p>
+</div>

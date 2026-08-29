@@ -1,0 +1,20 @@
+<div class="container">
+  <h2>Public mailing lists</h2>
+  {% for list in lists %}
+  <article class="card">
+    <h3>{{ list.name }}</h3>
+    <p class="meta">{{ list.address }}</p>
+    {% if list.description %}
+    <p>{{ list.description }}</p>
+    {% endif %}
+    <p>
+      <a class="button primary" href="/mailinglists/{{ list.id }}/subscribe">Subscribe</a>
+      {% if list.archive_enabled %}
+      <a class="button" href="/mailinglists/{{ list.id }}/archive">Archive</a>
+      {% endif %}
+    </p>
+  </article>
+  {% else %}
+  <p>No public mailing lists.</p>
+  {% endfor %}
+</div>

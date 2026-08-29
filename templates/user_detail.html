@@ -1,0 +1,11 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ target_user.email }}</h2>
+  </div>
+  <div class="card">
+    <p><strong>Full name:</strong> {{ target_user.fullname or '-' }}</p>
+    <p><strong>Active:</strong> {{ target_user.active }}</p>
+    <p><strong>Admin:</strong> {{ target_user.admin }}</p>
+    <p><strong>Roles:</strong> {{ roles | join(', ') }}</p>
+  </div>
+</div>

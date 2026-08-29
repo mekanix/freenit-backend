@@ -1,44 +1,120 @@
-import pytest
+from __future__ import annotations
 
-from freenit.modules import get_api_modules, get_models, resolve_modules
+from freenit.db import run_async
+from freenit.models.git import GitRepo
+from freenit.models.mailinglist import MailingList
+from freenit.models.project import Project
+from tests.test_app import create_user, login_cookie, set_login_cookie
 
 
-@pytest.mark.asyncio
-class TestModules:
-    async def test_resolve_auth_includes_user_and_role(self):
-        resolved = resolve_modules(["auth"])
-        assert resolved == {"auth", "user", "role"}
+def test_discovery_returns_modules(client):
+    response = client.get("/discovery")
+    assert response.status_code == 200
+    data = response.get_json()
+    assert "modules" in data
+    assert "blog" in data["modules"]
 
-    async def test_resolve_project_includes_user_role(self):
-        resolved = resolve_modules(["project"])
-        assert resolved == {"project", "user", "role"}
 
-    async def test_resolve_multiple_modules(self):
-        resolved = resolve_modules(["auth", "project", "mailinglist"])
-        assert resolved == {"auth", "project", "mailinglist", "user", "role"}
+def test_mailinglists_public_empty(client):
+    response = client.get("/mailinglists/public")
+    assert response.status_code == 200
+    assert b"No public mailing lists" in response.data
 
-    async def test_resolve_unknown_module_raises(self):
-        with pytest.raises(ValueError):
-            resolve_modules(["auth", "unknown"])
 
-    async def test_get_api_modules(self):
-        api_modules = get_api_modules(["auth", "project"])
-        assert "freenit.api.auth" in api_modules
-        assert "freenit.api.project" in api_modules
-        assert "freenit.api.mailinglist" not in api_modules
+def test_mailinglists_admin_requires_login(client):
+    response = client.get("/mailinglists")
+    assert response.status_code == 303
+    assert response.headers["Location"] == "/login"
 
-    async def test_get_models(self):
-        models = get_models(["auth", "project"])
-        assert "freenit.models.sql.base" in models
-        assert "freenit.models.sql.project" in models
-        assert "freenit.models.sql.mailinglist" not in models
 
-    async def test_discovery_endpoint(self, client):
-        response = client.get("/")
-        assert response.status_code == 200
-        data = response.json()
-        assert "modules" in data
-        assert "meta" in data
-        assert "auth" in data["modules"]
-        assert "user" in data["modules"]
-        assert "role" in data["modules"]
+def test_mailinglists_admin_requires_admin(client):
+    user = create_user("ml-user@example.com")
+    set_login_cookie(client, user.id)
+    response = client.get("/mailinglists")
+    assert response.status_code == 303
+
+
+def test_mailinglists_admin_allows_admin(client):
+    user = create_user("ml-admin@example.com", admin=True)
+    set_login_cookie(client, user.id)
+    response = client.get("/mailinglists")
+    assert response.status_code == 200
+    assert b"Mailing lists" in response.data
+
+
+def test_mailinglist_subscribe_flow(client):
+    ml = run_async(
+        MailingList.objects.create(
+            name="test-list",
+            address="test-list@example.com",
+            distribution_address="test-list-members@example.com",
+            archive_address="test-list-archive@example.com",
+            public=True,
+            archive_enabled=True,
+        )
+    )
+    response = client.get(f"/mailinglists/{ml.id}/subscribe")
+    assert response.status_code == 200
+    assert b"Subscribe" in response.data
+
+    response = client.post(
+        f"/mailinglists/{ml.id}/subscribe",
+        data={"email": "subscriber@example.com"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == 200
+
+
+def test_git_repos_public_empty(client):
+    response = client.get("/git/repos/public")
+    assert response.status_code == 200
+    assert b"No public repositories" in response.data
+
+
+def test_git_repos_admin_requires_admin(client):
+    user = create_user("git-user@example.com")
+    set_login_cookie(client, user.id)
+    response = client.get("/git/repos")
+    assert response.status_code == 303
+
+
+def test_git_smart_http_missing_repo_returns_404(client):
+    response = client.get("/git/nonexistent/info/refs?service=git-upload-pack")
+    assert response.status_code == 404
+
+
+def test_dav_requires_auth(client):
+    response = client.get("/cal")
+    assert response.status_code == 401
+
+
+def test_mail_requires_login(client):
+    response = client.get("/mail")
+    assert response.status_code == 303
+    assert response.headers["Location"] == "/login"
+
+
+def test_chat_public(client):
+    response = client.get("/chat")
+    assert response.status_code == 200
+    assert b"Chat" in response.data
+
+
+def test_domains_requires_admin(client):
+    user = create_user("domain-user@example.com")
+    set_login_cookie(client, user.id)
+    response = client.get("/domains")
+    assert response.status_code == 303
+
+
+def test_navigation_contains_new_modules(client):
+    user = create_user("nav-admin@example.com", admin=True)
+    set_login_cookie(client, user.id)
+    response = client.get("/")
+    assert response.status_code == 200
+    data = response.data
+    assert b"/mailinglists" in data
+    assert b"/git/repos" in data
+    assert b"/mail" in data
+    assert b"/chat" in data
+    assert b"/domains" in data

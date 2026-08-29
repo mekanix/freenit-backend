@@ -4,90 +4,31 @@ build-backend = "hatchling.build"
 
 [project]
 name = "freenit"
-dynamic = ["version"]
-description = "REST API framework based on FastAPI"
+version = "0.1.0"
+description = "Freenit Flask, HTMX, Chota, and Oxide web frontend"
 readme = "README.md"
-license = {file = "LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 dependencies = [
-  "cryptography",
-  "dulwich",
-  "fastapi",
-  "httpx",
+  "aiosqlite",
+  "email-validator",
+  "flask",
+  "oxyde",
   "passlib",
-  "prompt-toolkit",
   "pydantic[email]",
   "pyjwt",
-  "websockets",
-]
-authors = [
-  {name = "Goran Mekić", email = "meka@tilda.center"},
-]
-classifiers = [
-  "Development Status :: 4 - Beta",
-  "Intended Audience :: Developers",
-  "Topic :: Internet :: WWW/HTTP",
-  "Environment :: Web Environment",
-  "Programming Language :: Python"
+  "werkzeug",
 ]
 
 [project.optional-dependencies]
-  mongo = ["beanie"]
-  dev = [
-    "aiosqlite",
-    "ruff",
-    "uvicorn",
-  ]
-  doc = [
-    "mkdocs",
-    "mkdocs-material",
-    "mkdocs-awesome-pages-plugin",
-  ]
-  build = ["twine"]
-  ldap = ["bonsai"]
-  sql = [
-    "oxyde",
-  ]
-  test = [
-    "aiosqlite",
-    "bandit",
-    "httpx",
-    "pytest-asyncio",
-    "pytest-factoryboy",
-    "requests",
-    "ruff",
-  ]
-  all = [
-    "aiosqlite",
-    "bandit",
-    "beanie",
-    "bonsai",
-    "httpx",
-    "mkdocs",
-    "mkdocs-material",
-    "mkdocs-awesome-pages-plugin",
-    "oxyde",
-    "pytest-asyncio",
-    "pytest-factoryboy",
-    "requests",
-    "ruff",
-    "twine",
-    "uvicorn",
-  ]
-
-[project.urls]
-Homepage = "https://freenit.org" 
-Repository = "https://github.com/freenit-framework/backend"
+dev = [
+  "pytest",
+]
 
 [project.scripts]
 freenit = "freenit.cli:main"
 
-[tool.hatch.version]
-path = "freenit/__init__.py"
-
 [tool.hatch.build.targets.wheel]
-only-include = ["freenit", "bin"]
+packages = ["freenit"]
 
-[tool.hatch.build.targets.wheel.sources]
-"src" = ""
-"bin" = "freenit/bin"
+[tool.pytest.ini_options]
+testpaths = ["tests"]

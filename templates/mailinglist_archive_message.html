@@ -1,0 +1,14 @@
+<div class="container">
+  <article class="card">
+    <h2>{{ message.subject or '(no subject)' }}</h2>
+    <p class="meta">From {{ message.sender }} on {{ (message.sent_at or message.created_at).strftime('%x') }}</p>
+    {% if message.text_body %}
+    <pre>{{ message.text_body }}</pre>
+    {% elif message.html_body %}
+    <div>{{ message.html_body | safe }}</div>
+    {% else %}
+    <p>No message body.</p>
+    {% endif %}
+    <p><a href="/mailinglists/{{ mailing_list.id }}/archive">Back to archive</a></p>
+  </article>
+</div>

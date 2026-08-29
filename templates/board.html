@@ -1,0 +1,21 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ board.name }}</h2>
+  </div>
+  <div class="board" style="display: flex; gap: 1rem; overflow-x: auto;">
+    {% for column in columns %}
+    <div class="card" style="min-width: 250px; flex: 0 0 auto;">
+      <h4>{{ column.name }}</h4>
+      {% for task in column.tasks %}
+      <div class="card" style="margin-bottom: 10px;">
+        <a href="/projects/{{ project.id }}/boards/{{ board.id }}/tasks/{{ task.id }}">{{ task.title }}</a>
+      </div>
+      {% endfor %}
+      <form hx-post="/projects/{{ project.id }}/boards/{{ board.id }}/columns/{{ column.id }}/tasks" hx-target="#main" hx-swap="innerHTML">
+        <input type="text" name="title" placeholder="New task" required>
+        <button type="submit" class="button primary small">+</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+</div>

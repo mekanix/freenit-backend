@@ -1,0 +1,30 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ course.name }}</h2>
+  </div>
+  {% if course.description %}
+  <p>{{ course.description }}</p>
+  {% endif %}
+  <div class="card">
+    <h3>Lectures</h3>
+    {% if user %}
+    <form hx-post="/courses/{{ course.id }}/lectures" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Title
+        <input type="text" name="title" required>
+      </label>
+      <label>
+        Content
+        <textarea name="content" rows="5"></textarea>
+      </label>
+      <button type="submit" class="button primary">Add lecture</button>
+    </form>
+    {% endif %}
+    <ol>
+      {% for lecture in lectures %}
+      <li><a href="/courses/{{ course.id }}/lectures/{{ lecture.id }}">{{ lecture.title }}</a></li>
+      {% endfor %}
+    </ol>
+  </div>
+  <p><a class="button" href="/courses/{{ course.id }}/groups">Manage groups</a></p>
+</div>

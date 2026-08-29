@@ -1,0 +1,28 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ course.name }} groups</h2>
+  </div>
+  <div class="card">
+    <form hx-post="/courses/{{ course.id }}/groups" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" required>
+      </label>
+      <label>
+        Description
+        <textarea name="description" rows="2"></textarea>
+      </label>
+      <button type="submit" class="button primary">Create group</button>
+    </form>
+  </div>
+  <div class="card">
+    <div class="table-grid" style="grid-template-columns: 1fr auto;">
+      <div class="heading">Name</div>
+      <div class="heading">Actions</div>
+      {% for group in groups %}
+      <div class="data">{{ group.name }}</div>
+      <div class="data"><a class="button" href="/courses/{{ course.id }}/groups/{{ group.id }}/members">Members</a></div>
+      {% endfor %}
+    </div>
+  </div>
+</div>

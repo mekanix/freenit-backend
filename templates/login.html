@@ -1,0 +1,16 @@
+<div class="container">
+  <div class="card">
+    <h1>Log in</h1>
+    <form hx-post="/login" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Email
+        <input type="email" name="email" value="{{ email }}" required autofocus>
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" required>
+      </label>
+      <button type="submit" class="button primary">Log in</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,85 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ repo.name }}</h2>
+  </div>
+  <p class="meta">{{ repo.path }}</p>
+  <div class="card">
+    <form hx-post="/git/repos/{{ repo.id }}" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Description
+        <textarea name="description" rows="3">{{ repo.description or '' }}</textarea>
+      </label>
+      <label>
+        <input type="checkbox" name="public" value="true" {% if repo.public %}checked{% endif %}>
+        Public
+      </label>
+      <label>
+        Default branch
+        <input type="text" name="default_branch" value="{{ repo.default_branch }}">
+      </label>
+      <label>
+        <input type="checkbox" name="tests_enabled" value="true" {% if repo.tests_enabled %}checked{% endif %}>
+        Tests enabled
+      </label>
+      <label>
+        Test command
+        <input type="text" name="test_command" value="{{ repo.test_command or '' }}">
+      </label>
+      <label>
+        Webhook URL
+        <input type="text" name="webhook_url" value="{{ repo.webhook_url or '' }}">
+      </label>
+      <button type="submit" class="button primary">Update</button>
+    </form>
+    <form hx-post="/git/repos/{{ repo.id }}/delete" hx-target="#main" hx-swap="innerHTML" onsubmit="return confirm('Delete this repository?')" style="margin-top: 1rem;">
+      <button type="submit" class="button error">Delete repository</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Permissions</h3>
+    <form hx-post="/git/repos/{{ repo.id }}/permissions" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+      <label>
+        Access
+        <select name="access">
+          <option value="read">read</option>
+          <option value="write">write</option>
+        </select>
+      </label>
+      <button type="submit" class="button primary">Add permission</button>
+    </form>
+    <div class="table-grid" style="grid-template-columns: 1fr auto auto; margin-top: 1rem;">
+      <div class="heading">Email</div>
+      <div class="heading">Access</div>
+      <div class="heading">Actions</div>
+      {% for perm in permissions %}
+      <div class="data">{{ perm.user_email }}</div>
+      <div class="data">{{ perm.access }}</div>
+      <div class="data">
+        <form class="inline-form" hx-post="/git/repos/{{ repo.id }}/permissions/{{ perm.id }}/delete" hx-target="#main" hx-swap="innerHTML">
+          <button type="submit" class="button error small">Remove</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="card">
+    <h3>Push log</h3>
+    <div class="table-grid" style="grid-template-columns: 1fr 1fr auto auto;">
+      <div class="heading">Ref</div>
+      <div class="heading">Pusher</div>
+      <div class="heading">Status</div>
+      <div class="heading">Time</div>
+      {% for log in push_logs %}
+      <div class="data">{{ log.ref }}</div>
+      <div class="data">{{ log.pusher_email }}</div>
+      <div class="data">{{ log.status }}</div>
+      <div class="data">{{ log.created_at }}</div>
+      {% endfor %}
+    </div>
+  </div>
+  <p><a class="button" href="/git/repos/{{ repo.id }}/hooks">Hook scripts</a></p>
+</div>

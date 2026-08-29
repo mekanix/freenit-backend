@@ -1,42 +1,44 @@
+from __future__ import annotations
+
 import os
 from pathlib import Path
 
 from oxyde.migrations.utils import detect_dialect
 
-from freenit.config import getConfig
-from freenit.modules import get_models
 
-
-def database_url():
-    env = os.getenv("FREENIT_ENV", "prod")
-    candidates = [
-        os.getenv("FREENIT_DBURL"),
-        os.getenv("DATABASE_URL"),
-        os.getenv(f"FREENIT_{env.upper()}_DBURL"),
-    ]
-    for candidate in candidates:
-        if candidate:
-            return candidate
-    if env == "prod":
+def database_url() -> str:
+    env = os.getenv("FREENIT_ENV", "production").lower()
+    aliases = {"dev": "development", "test": "testing", "prod": "production"}
+    env = aliases.get(env, env)
+    env_upper = env.upper()
+    for name in ("FREENIT_DBURL", "DATABASE_URL", f"FREENIT_{env_upper}_DBURL"):
+        value = os.getenv(name)
+        if value:
+            return value
+    if env == "production":
         raise RuntimeError(
             "No database URL configured. Set FREENIT_DBURL, DATABASE_URL, "
-            "or FREENIT_PROD_DBURL."
+            "or FREENIT_PRODUCTION_DBURL."
         )
-    filename = "test.sqlite" if env == "test" else "db.sqlite"
+    filename = ".test.sqlite" if env == "testing" else ".dev.sqlite"
     return f"sqlite:///{Path(filename).resolve()}"
 
 
-def database_dialect():
+def database_dialect() -> str:
     explicit = os.getenv("FREENIT_DIALECT")
     if explicit:
         return explicit
     return detect_dialect(database_url())
 
 
-config = getConfig()
-MODELS = get_models(config.modules)
+MODELS = [
+    "freenit.models.sql",
+    "freenit.models.blog",
+    "freenit.models.project",
+    "freenit.models.lms",
+    "freenit.models.mailinglist",
+    "freenit.models.git",
+]
 DIALECT = database_dialect()
 MIGRATIONS_DIR = "migrations"
-DATABASES = {
-    "default": database_url(),
-}
+DATABASES = {"default": database_url()}

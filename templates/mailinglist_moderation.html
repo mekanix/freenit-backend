@@ -1,0 +1,23 @@
+<div class="container">
+  <h2>{{ mailing_list.name }} moderation</h2>
+  {% for message in messages %}
+  <article class="card">
+    <h3>{{ message.subject or '(no subject)' }}</h3>
+    <p class="meta">From {{ message.sender }}</p>
+    {% if message.text_body %}
+    <pre>{{ message.text_body }}</pre>
+    {% elif message.html_body %}
+    <div>{{ message.html_body | safe }}</div>
+    {% endif %}
+    <form class="inline-form" hx-post="/mailinglists/{{ mailing_list.id }}/moderation/{{ message.id }}/approve" hx-target="#main" hx-swap="innerHTML">
+      <button type="submit" class="button primary">Approve</button>
+    </form>
+    <form class="inline-form" hx-post="/mailinglists/{{ mailing_list.id }}/moderation/{{ message.id }}/reject" hx-target="#main" hx-swap="innerHTML">
+      <button type="submit" class="button error">Reject</button>
+    </form>
+  </article>
+  {% else %}
+  <p>No pending moderation messages.</p>
+  {% endfor %}
+  <p><a href="/mailinglists/{{ mailing_list.id }}">Back to list</a></p>
+</div>

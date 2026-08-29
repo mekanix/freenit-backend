@@ -1,0 +1,12 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ repo.name }} hooks</h2>
+  </div>
+  {% for name, script in hooks.items() %}
+  <div class="card">
+    <h3>{{ name }}</h3>
+    <pre>{{ script }}</pre>
+  </div>
+  {% endfor %}
+  <p><a href="/git/repos/{{ repo.id }}">Back to repository</a></p>
+</div>

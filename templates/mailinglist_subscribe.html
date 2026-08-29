@@ -1,0 +1,13 @@
+<div class="container">
+  <div class="card">
+    <h2>Subscribe to {{ mailing_list.name }}</h2>
+    <p class="meta">{{ mailing_list.address }}</p>
+    <form hx-post="/mailinglists/{{ mailing_list.id }}/subscribe" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Email
+        <input type="email" name="email" required>
+      </label>
+      <button type="submit" class="button primary">Subscribe</button>
+    </form>
+  </div>
+</div>

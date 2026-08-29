@@ -1,1 +1,3 @@
-__version__ = "0.3.29"
+from .app import create_app
+
+__all__ = ["create_app"]

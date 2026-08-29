@@ -1,108 +1,142 @@
-import jwt
+from __future__ import annotations
+
+from functools import wraps
+
 import oxyde
-from fastapi import HTTPException
-from passlib.hash import pbkdf2_sha256
-from starlette.requests import HTTPConnection
-from time import time
+from flask import current_app, g, make_response, redirect, request
 
-from freenit.config import getConfig
+from . import security
+from .db import run_async
+from .models import User
+
+ACCESS_COOKIE = "access"
+REFRESH_COOKIE = "refresh"
 
 
-async def decode(token):
-    config = getConfig()
-    User = config.get_model("user").User
-    try:
-        data = jwt.decode(token, config.secret, algorithms=["HS256"])
-    except:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    pk = data.get("pk", None)
+def _cookie_attrs(config, max_age: int) -> dict:
+    return {
+        "httponly": True,
+        "secure": config.cookie_secure,
+        "samesite": "Lax",
+        "path": "/",
+        "max_age": max_age,
+    }
+
+
+def set_auth_cookies(response, user) -> None:
+    config = current_app.config["FREENIT_CONFIG"]
+    access = security.encode(user, config.secret_key, config.auth.expire)
+    refresh = security.encode(user, config.secret_key, config.auth.refresh_expire)
+    response.set_cookie(ACCESS_COOKIE, access, **_cookie_attrs(config, config.auth.expire))
+    response.set_cookie(
+        REFRESH_COOKIE, refresh, **_cookie_attrs(config, config.auth.refresh_expire)
+    )
+
+
+def clear_auth_cookies(response) -> None:
+    for name in (ACCESS_COOKIE, REFRESH_COOKIE):
+        response.delete_cookie(name, path="/", samesite="Lax")
+
+
+async def _decode_user(token: str) -> User | None:
+    config = current_app.config["FREENIT_CONFIG"]
+    data = security.decode(token, config.secret_key)
+    if data is None:
+        return None
+    pk = data.get("pk")
     if pk is None:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    if User.dbtype() == "sql":
-        try:
-            user = await User.objects.prefetch("roles").filter(id=pk).get()
-            return user
-        except oxyde.NotFoundError:
-            raise HTTPException(status_code=403, detail="Unauthorized")
-    elif User.dbtype() == "ldap":
-        user = await User.get(pk)
-        return user
-    raise HTTPException(status_code=409, detail="Unknown user type")
+        return None
+    try:
+        return await User.objects.prefetch("roles").filter(id=pk, active=True).get()
+    except oxyde.NotFoundError:
+        return None
 
 
-def encode(user):
-    config = getConfig()
-    payload = {}
-    if user.dbtype() == "sql":
-        payload = {"pk": user.pk, "type": "sql", "jid": user.email}
-    elif user.dbtype() == "ldap":
-        payload = {"pk": user.dn, "type": "ldap", "jid": user.email}
-    payload["exp"] = int(time()) + config.auth.expire
-    return jwt.encode(payload, config.secret, algorithm="HS256")
+async def _current_user() -> User | None:
+    token = request.cookies.get(ACCESS_COOKIE)
+    if not token:
+        return None
+    return await _decode_user(token)
 
 
-async def authorize(request: HTTPConnection, roles=[], allof=[], cookie="access"):
+def current_user() -> User | None:
+    if "user" not in g:
+        g.user = run_async(_current_user())
+    return g.user
+
+
+async def authorize(cookie: str = ACCESS_COOKIE, roles: list[str] | None = None, allof: list[str] | None = None) -> User:
+    roles = roles or []
+    allof = allof or []
     token = request.cookies.get(cookie)
     if not token:
-        raise HTTPException(status_code=403, detail="Unauthorized")
-    user = await decode(token)
-    if user.dbtype() == "sql":
-        if not user.active:
-            raise HTTPException(status_code=403, detail="Permission denied")
-        if user.admin:
-            return user
-        if len(user.roles) == 0:
-            if len(roles) > 0 or len(allof) > 0:
-                raise HTTPException(status_code=403, detail="Permission denied")
-        else:
-            if len(roles) > 0:
-                found = False
-                for role in user.roles:
-                    if role.name in roles:
-                        found = True
-                        break
-                if not found:
-                    raise HTTPException(status_code=403, detail="Permission denied")
-            if len(allof) > 0:
-                for role in user.roles:
-                    if role.name not in allof:
-                        raise HTTPException(status_code=403, detail="Permission denied")
+        raise PermissionError("Unauthorized")
+    user = await _decode_user(token)
+    if user is None:
+        raise PermissionError("Unauthorized")
+    if user.admin:
         return user
-    elif user.dbtype() == "ldap":
-        from freenit.models.ldap.base import get_client, class2filter
-        from bonsai import LDAPSearchScope, errors
-
-        config = getConfig()
-        _, domain = user.email.split("@")
-        classes = class2filter(config.ldap.groupClasses)
-        dn = f"{config.ldap.domainDN.format(domain)},{config.ldap.roleBase}"
-        client = get_client()
-        async with client.connect(is_async=True) as conn:
-            try:
-                res = await conn.search(
-                    dn,
-                    LDAPSearchScope.SUB,
-                    f"(&{classes}(memberUid={user.uidNumber}))",
-                )
-            except errors.AuthenticationError:
-                raise HTTPException(status_code=403, detail="Failed to login")
-        user.groups = [g["gidNumber"][0] for g in res]
+    if not user.roles:
+        if roles or allof:
+            raise PermissionError("Permission denied")
+    else:
+        user_roles = {role.name for role in user.roles}
+        if roles and not any(role in user_roles for role in roles):
+            raise PermissionError("Permission denied")
+        if allof and not all(role in user_roles for role in allof):
+            raise PermissionError("Permission denied")
     return user
 
 
-def verify(password, encpassword):
-    config = getConfig()
-    return pbkdf2_sha256.verify(f"{config.secret}{password}", encpassword)
-
-
-def encrypt(password):
-    config = getConfig()
-    return pbkdf2_sha256.hash(f"{config.secret}{password}")
-
-
-def permissions(roles=[], allof=[]):
-    async def handler(request: HTTPConnection):
-        user = await authorize(request, roles, allof)
-        return user
+def permissions(roles: list[str] | None = None, allof: list[str] | None = None):
+    async def handler() -> User:
+        return await authorize(roles=roles, allof=allof)
 
     return handler
+
+
+profile_perms = permissions()
+user_perms = permissions()
+role_perms = permissions()
+
+
+def htmx_redirect(path: str):
+    response = make_response("", 204)
+    response.headers["HX-Redirect"] = path
+    return response
+
+
+def login_required(view):
+    @wraps(view)
+    def wrapper(*args, **kwargs):
+        if current_user() is None:
+            if request.headers.get("HX-Request"):
+                return htmx_redirect("/login")
+            return redirect("/login", code=303)
+        return view(*args, **kwargs)
+
+    return wrapper
+
+
+def roles_required(*role_names: str):
+    def decorator(view):
+        @wraps(view)
+        def wrapper(*args, **kwargs):
+            user = current_user()
+            if user is None:
+                if request.headers.get("HX-Request"):
+                    return htmx_redirect("/login")
+                return redirect("/login", code=303)
+            if user.admin or all(user.has_role(name) for name in role_names):
+                return view(*args, **kwargs)
+            if request.headers.get("HX-Request"):
+                response = make_response("", 204)
+                response.headers["HX-Push-Url"] = "/"
+                response.headers["HX-Reswap"] = "none"
+                response.headers["HX-Trigger"] = "forbidden"
+                return response
+            return redirect("/", code=303)
+
+        return wrapper
+
+    return decorator

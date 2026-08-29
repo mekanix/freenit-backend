@@ -1,0 +1,37 @@
+<div class="container">
+  <div class="header">
+    <h2>Sieve scripts</h2>
+  </div>
+  <div class="card">
+    <ul>
+      {% for script in scripts %}
+      <li>
+        <a href="/mail/sieve/scripts/{{ script.name }}">{{ script.name }}</a>
+        {% if script.active %}(active){% endif %}
+        <form class="inline-form" hx-post="/mail/sieve/scripts/{{ script.name }}/active" hx-target="#main" hx-swap="innerHTML">
+          <button type="submit" class="button primary small">Activate</button>
+        </form>
+        <form class="inline-form" hx-post="/mail/sieve/scripts/{{ script.name }}/delete" hx-target="#main" hx-swap="innerHTML">
+          <button type="submit" class="button error small">Delete</button>
+        </form>
+      </li>
+      {% else %}
+      <li>No sieve scripts.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3>New script</h3>
+    <form hx-post="/mail/sieve/scripts/default" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Name
+        <input type="text" name="name" value="default" required>
+      </label>
+      <label>
+        Content
+        <textarea name="content" rows="10" required></textarea>
+      </label>
+      <button type="submit" class="button primary">Save</button>
+    </form>
+  </div>
+</div>

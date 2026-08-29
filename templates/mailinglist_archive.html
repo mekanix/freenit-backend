@@ -1,0 +1,11 @@
+<div class="container">
+  <h2>{{ mailing_list.name }} archive</h2>
+  {% for message in messages %}
+  <article class="card">
+    <h3><a href="/mailinglists/{{ mailing_list.id }}/archive/{{ message.id }}">{{ message.subject or '(no subject)' }}</a></h3>
+    <p class="meta">From {{ message.sender }} on {{ (message.sent_at or message.created_at).strftime('%x') }}</p>
+  </article>
+  {% else %}
+  <p>No archived messages yet.</p>
+  {% endfor %}
+</div>

@@ -1,0 +1,62 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ mailing_list.name }}</h2>
+  </div>
+  <p class="meta">{{ mailing_list.address }}</p>
+  <div class="card">
+    <form hx-post="/mailinglists/{{ mailing_list.id }}" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Description
+        <textarea name="description" rows="3">{{ mailing_list.description or '' }}</textarea>
+      </label>
+      <label>
+        <input type="checkbox" name="public" value="true" {% if mailing_list.public %}checked{% endif %}>
+        Public
+      </label>
+      <label>
+        <input type="checkbox" name="archive_enabled" value="true" {% if mailing_list.archive_enabled %}checked{% endif %}>
+        Archive enabled
+      </label>
+      <label>
+        <input type="checkbox" name="moderation_enabled" value="true" {% if mailing_list.moderation_enabled %}checked{% endif %}>
+        Moderation enabled
+      </label>
+      <button type="submit" class="button primary">Update</button>
+    </form>
+    <form hx-post="/mailinglists/{{ mailing_list.id }}/delete" hx-target="#main" hx-swap="innerHTML" onsubmit="return confirm('Delete this mailing list?')" style="margin-top: 1rem;">
+      <button type="submit" class="button error">Delete list</button>
+    </form>
+  </div>
+  <div class="card">
+    <h3>Subscribers</h3>
+    <p><a class="button" href="/mailinglists/{{ mailing_list.id }}/subscribers">Manage subscribers</a></p>
+    <ul>
+      {% for subscriber in subscribers %}
+      <li>{{ subscriber.email }}</li>
+      {% else %}
+      <li>No subscribers yet.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Pending</h3>
+    <ul>
+      {% for item in pending %}
+      <li>{{ item.email }} ({{ item.action }})</li>
+      {% else %}
+      <li>No pending requests.</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Moderation</h3>
+    <p><a class="button" href="/mailinglists/{{ mailing_list.id }}/moderation">Moderation queue</a></p>
+    <ul>
+      {% for message in moderation %}
+      <li>{{ message.subject or '(no subject)' }} from {{ message.sender }}</li>
+      {% else %}
+      <li>No pending moderation messages.</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

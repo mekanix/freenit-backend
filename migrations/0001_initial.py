@@ -1,91 +1,9 @@
-"""Auto-generated migration.
-
-Created: 2026-04-13 20:17:08
-"""
+"""Create users, roles, and user_role tables."""
 
 depends_on = None
 
 
 def upgrade(ctx):
-    """Apply migration."""
-    ctx.create_table(
-        "user_role",
-        fields=[
-            {
-                "name": "id",
-                "python_type": "int",
-                "db_type": None,
-                "nullable": True,
-                "primary_key": True,
-                "unique": False,
-                "default": None,
-                "auto_increment": False,
-            },
-            {
-                "name": "user_id",
-                "python_type": "int",
-                "db_type": None,
-                "nullable": True,
-                "primary_key": False,
-                "unique": False,
-                "default": None,
-                "auto_increment": False,
-            },
-            {
-                "name": "role_id",
-                "python_type": "int",
-                "db_type": None,
-                "nullable": True,
-                "primary_key": False,
-                "unique": False,
-                "default": None,
-                "auto_increment": False,
-            },
-        ],
-        foreign_keys=[
-            {
-                "name": "fk_user_role_user_id",
-                "columns": ["user_id"],
-                "ref_table": "user",
-                "ref_columns": ["id"],
-                "on_delete": "CASCADE",
-                "on_update": "CASCADE",
-            },
-            {
-                "name": "fk_user_role_role_id",
-                "columns": ["role_id"],
-                "ref_table": "role",
-                "ref_columns": ["id"],
-                "on_delete": "CASCADE",
-                "on_update": "CASCADE",
-            },
-        ],
-    )
-    ctx.create_table(
-        "role",
-        fields=[
-            {
-                "name": "id",
-                "python_type": "int",
-                "db_type": None,
-                "nullable": True,
-                "primary_key": True,
-                "unique": False,
-                "default": None,
-                "auto_increment": False,
-            },
-            {
-                "name": "name",
-                "python_type": "str",
-                "db_type": None,
-                "nullable": False,
-                "primary_key": False,
-                "unique": True,
-                "default": None,
-                "auto_increment": False,
-            },
-        ],
-    )
     ctx.create_table(
         "user",
         fields=[
@@ -149,12 +67,99 @@ def upgrade(ctx):
                 "default": "0",
                 "auto_increment": False,
             },
+            {
+                "name": "omemo_bundle",
+                "python_type": "str",
+                "db_type": None,
+                "nullable": True,
+                "primary_key": False,
+                "unique": False,
+                "default": None,
+                "auto_increment": False,
+            },
+        ],
+    )
+    ctx.create_table(
+        "role",
+        fields=[
+            {
+                "name": "id",
+                "python_type": "int",
+                "db_type": None,
+                "nullable": True,
+                "primary_key": True,
+                "unique": False,
+                "default": None,
+                "auto_increment": False,
+            },
+            {
+                "name": "name",
+                "python_type": "str",
+                "db_type": None,
+                "nullable": False,
+                "primary_key": False,
+                "unique": True,
+                "default": None,
+                "auto_increment": False,
+            },
+        ],
+    )
+    ctx.create_table(
+        "user_role",
+        fields=[
+            {
+                "name": "id",
+                "python_type": "int",
+                "db_type": None,
+                "nullable": True,
+                "primary_key": True,
+                "unique": False,
+                "default": None,
+                "auto_increment": False,
+            },
+            {
+                "name": "user_id",
+                "python_type": "int",
+                "db_type": None,
+                "nullable": True,
+                "primary_key": False,
+                "unique": False,
+                "default": None,
+                "auto_increment": False,
+            },
+            {
+                "name": "role_id",
+                "python_type": "int",
+                "db_type": None,
+                "nullable": True,
+                "primary_key": False,
+                "unique": False,
+                "default": None,
+                "auto_increment": False,
+            },
+        ],
+        foreign_keys=[
+            {
+                "name": "fk_user_role_user_id",
+                "columns": ["user_id"],
+                "ref_table": "user",
+                "ref_columns": ["id"],
+                "on_delete": "CASCADE",
+                "on_update": "CASCADE",
+            },
+            {
+                "name": "fk_user_role_role_id",
+                "columns": ["role_id"],
+                "ref_table": "role",
+                "ref_columns": ["id"],
+                "on_delete": "CASCADE",
+                "on_update": "CASCADE",
+            },
         ],
     )
 
 
 def downgrade(ctx):
-    """Revert migration."""
-    ctx.drop_table("user")
-    ctx.drop_table("role")
     ctx.drop_table("user_role")
+    ctx.drop_table("role")
+    ctx.drop_table("user")

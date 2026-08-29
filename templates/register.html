@@ -1,0 +1,20 @@
+<div class="container">
+  <div class="card">
+    <h1>Register</h1>
+    <form hx-post="/register" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        Email
+        <input type="email" name="email" required autofocus>
+      </label>
+      <label>
+        Password
+        <input type="password" name="password" required>
+      </label>
+      <label>
+        Full name
+        <input type="text" name="fullname">
+      </label>
+      <button type="submit" class="button primary">Register</button>
+    </form>
+  </div>
+</div>

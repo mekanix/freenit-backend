@@ -1,0 +1,23 @@
+<div class="container">
+  <div class="card">
+    <h2>Compose message</h2>
+    {% if error %}
+    <p class="text-error">{{ error }}</p>
+    {% endif %}
+    <form hx-post="/mail/compose" hx-target="#main" hx-swap="innerHTML">
+      <label>
+        To
+        <input type="email" name="to" required>
+      </label>
+      <label>
+        Subject
+        <input type="text" name="subject" required>
+      </label>
+      <label>
+        Message
+        <textarea name="body" rows="10" required></textarea>
+      </label>
+      <button type="submit" class="button primary">Send</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,14 @@
+<div class="container">
+  <h2>Public Git repositories</h2>
+  {% for repo in repos %}
+  <article class="card">
+    <h3>{{ repo.name }}</h3>
+    {% if repo.description %}
+    <p>{{ repo.description }}</p>
+    {% endif %}
+    <p class="meta">Default branch: {{ repo.default_branch }}</p>
+  </article>
+  {% else %}
+  <p>No public repositories.</p>
+  {% endfor %}
+</div>

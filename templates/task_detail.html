@@ -1,0 +1,19 @@
+<div class="container">
+  <div class="header">
+    <h2>{{ task.title }}</h2>
+  </div>
+  <div class="card">
+    <p><strong>Column:</strong> {{ column.name }}</p>
+    {% if assignee %}
+    <p><strong>Assignee:</strong> {{ assignee.email }}</p>
+    {% endif %}
+    {% if children %}
+    <h4>Subtasks</h4>
+    <ul>
+      {% for child in children %}
+      <li><a href="/projects/{{ project.id }}/boards/{{ board.id }}/tasks/{{ child.id }}">{{ child.title }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>

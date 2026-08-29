@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }} - Freenit</title>
+    <link rel="stylesheet" href="https://unpkg.com/chota@latest">
+    <link rel="stylesheet" href="{{ url_for('static', filename='root.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.5"></script>
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem('freenit-theme-mode');
+          if (mode !== 'light' && mode !== 'dark') {
+            mode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+          document.documentElement.setAttribute('data-theme', mode);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body
+    hx-boost="true"
+    hx-ext="head-support"
+    hx-target="#main"
+    hx-swap="innerHTML"
+    hx-push-url="true"
+  >
+    <input type="checkbox" id="menu-toggle" class="menu-toggle">
+    <div class="left-pane">
+      <div class="left-pane-wrapper">
+        <label for="menu-toggle" class="close-button" aria-label="Close menu">&times;</label>
+        <nav class="menu-items">
+          {% if user %}
+            {% if user.admin %}
+            <a class="menu-item" href="/users" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Users
+            </a>
+            <a class="menu-item" href="/roles" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9734;</span> Roles
+            </a>
+            <a class="menu-item" href="/mailinglists" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9993;</span> Mailing Lists
+            </a>
+            <a class="menu-item" href="/git/repos" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Git
+            </a>
+            <a class="menu-item" href="/domains" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Domains
+            </a>
+            {% endif %}
+            <a class="menu-item" href="/projects" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Projects
+            </a>
+            <a class="menu-item" href="/courses" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Courses
+            </a>
+            <a class="menu-item" href="/profile" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Profile
+            </a>
+            <a class="menu-item" href="/mail" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9993;</span> Mail
+            </a>
+            <a class="menu-item" href="/calendar" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9747;</span> Calendar
+            </a>
+            <a class="menu-item" href="/contacts" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Contacts
+            </a>
+            <a class="menu-item" href="/files" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Files
+            </a>
+            <a class="menu-item" href="/sieve" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Filters
+            </a>
+            <a class="menu-item" href="/chat" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Chat
+            </a>
+            <a class="menu-item" href="/blog" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Blog
+            </a>
+            <form class="menu-item" hx-post="/logout" hx-target="#main" hx-swap="innerHTML" onclick="document.getElementById('menu-toggle').checked=false">
+              <button type="submit" class="menu-link">
+                <span class="menu-icon" aria-hidden="true">&#8594;</span> Logout
+              </button>
+            </form>
+          {% else %}
+            <a class="menu-item" href="/mailinglists/public" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9993;</span> Mailing Lists
+            </a>
+            <a class="menu-item" href="/blog" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#9733;</span> Blog
+            </a>
+            <a class="menu-item" href="/register" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#8595;</span> Register
+            </a>
+            <a class="menu-item" href="/login" onclick="document.getElementById('menu-toggle').checked=false">
+              <span class="menu-icon" aria-hidden="true">&#8594;</span> Login
+            </a>
+          {% endif %}
+        </nav>
+      </div>
+    </div>
+    <div class="root">
+      <header class="menu-bar">
+        <label for="menu-toggle" class="menu-button" aria-label="Open menu">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </label>
+        <a href="/" class="title">Freenit</a>
+        <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="5" fill="currentColor"/>
+            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </header>
+      <main id="main">{{ content | safe }}</main>
+      <div id="toast"></div>
+    </div>
+    <script>
+      document.getElementById('theme-toggle').addEventListener('click', function () {
+        var html = document.documentElement;
+        var current = html.getAttribute('data-theme') || 'light';
+        var next = current === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        try { localStorage.setItem('freenit-theme-mode', next); } catch (e) {}
+      });
+    </script>
+  </body>
+</html>

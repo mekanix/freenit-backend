@@ -1,0 +1,10 @@
+<div class="container">
+  <div class="card">
+    <h2>Chat</h2>
+    {% if ws_url %}
+    <p>WebSocket URL: <code>{{ ws_url }}</code></p>
+    {% else %}
+    <p>No chat server configured.</p>
+    {% endif %}
+  </div>
+</div>

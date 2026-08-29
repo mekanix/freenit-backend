@@ -1,4 +1,0 @@
-- name: install devel packages
-  with_items: "{{ devel_packages }}"
-  package:
-    name: "{{ item.name }}"

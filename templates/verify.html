@@ -1,0 +1,10 @@
+<div class="container">
+  <div class="card">
+    <h2>Verify account</h2>
+    {% if verified %}
+    <p>Your account is verified. <a href="/login">Log in</a></p>
+    {% else %}
+    <p class="text-error">Verification failed.</p>
+    {% endif %}
+  </div>
+</div>
