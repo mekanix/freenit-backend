@@ -4,6 +4,8 @@ import oxyde
 import pydantic
 
 from freenit import security
+from freenit.config import LDAPConfig
+from freenit.ldap_auth import LDAPError, ldap_login
 
 
 class OxydeBaseModel(oxyde.Model):
@@ -99,6 +101,7 @@ class User(OxydeBaseModel):
     fullname: str | None = oxyde.Field(default=None)
     active: bool = oxyde.Field(default=False)
     admin: bool = oxyde.Field(default=False)
+    provider: str = oxyde.Field(default="local")
     omemo_bundle: str | None = oxyde.Field(default=None)
     roles: list[BaseRole] = oxyde.Field(
         default_factory=list, db_m2m=True, db_through="UserRole"
@@ -119,7 +122,35 @@ class User(OxydeBaseModel):
         return security.verify(password, self.password, secret)
 
     @classmethod
-    async def login(cls, email: str, password: str, secret: str) -> "User | None":
+    async def _sync_ldap_user(
+        cls, attrs: dict, ldap_config: LDAPConfig
+    ) -> "User | None":
+        email = attrs.get("email")
+        if not email:
+            return None
+
+        try:
+            user = await cls.objects.filter(email=email).get()
+        except oxyde.NotFoundError:
+            user = cls(
+                email=email,
+                password="",
+                provider="ldap",
+            )
+
+        user.fullname = attrs.get("fullname") or user.fullname
+        user.active = attrs.get("active", True)
+        user.admin = attrs.get("admin", False)
+        user.provider = "ldap"
+        if attrs.get("omemo_bundle") is not None:
+            user.omemo_bundle = attrs["omemo_bundle"]
+        await user.save()
+        return await cls.objects.prefetch("roles").filter(email=email).get()
+
+    @classmethod
+    async def _local_login(
+        cls, email: str, password: str, secret: str
+    ) -> "User | None":
         try:
             user = await cls.objects.prefetch("roles").filter(
                 email=email, active=True
@@ -129,6 +160,32 @@ class User(OxydeBaseModel):
         if user.check(password, secret):
             return user
         return None
+
+    @classmethod
+    async def login(
+        cls,
+        email: str,
+        password: str,
+        secret: str,
+        ldap_config: LDAPConfig | None = None,
+    ) -> "User | None":
+        if ldap_config is not None:
+            try:
+                attrs = await ldap_login(email, password, ldap_config)
+            except LDAPError:
+                # If the LDAP server is unreachable, do not fall back to local
+                # auth unless explicitly allowed.
+                if not ldap_config.allow_local_fallback:
+                    return None
+                attrs = None
+
+            if attrs is not None:
+                return await cls._sync_ldap_user(attrs, ldap_config)
+
+            if not ldap_config.allow_local_fallback:
+                return None
+
+        return await cls._local_login(email, password, secret)
 
     async def fetch_roles(self) -> RoleList:
         links = await UserRole.objects.filter(user_id=self.id).all()

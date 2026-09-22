@@ -23,7 +23,9 @@ def login():
 def login_submit():
     email = request.form.get("email", "")
     password = request.form.get("password", "")
-    user = run_async(User.login(email, password, _config().secret_key))
+    user = run_async(
+        User.login(email, password, _config().secret_key, _config().ldap)
+    )
     if user is None:
         return render_fragment_response(
             "login.html",

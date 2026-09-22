@@ -1,4 +1,5 @@
 <!doctype html>
+{% from "icons.html" import icon %}
 <html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8">
@@ -6,8 +7,8 @@
     <title>{{ title }} - Freenit</title>
     <link rel="stylesheet" href="https://unpkg.com/chota@latest">
     <link rel="stylesheet" href="{{ url_for('static', filename='root.css') }}">
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-head-support@2.0.5"></script>
+    <script src="{{ url_for('static', filename='vendor/htmx.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='vendor/htmx-ext-head-support.min.js') }}"></script>
     <script>
       (function () {
         try {
@@ -30,73 +31,73 @@
     <input type="checkbox" id="menu-toggle" class="menu-toggle">
     <div class="left-pane">
       <div class="left-pane-wrapper">
-        <label for="menu-toggle" class="close-button" aria-label="Close menu">&times;</label>
+        <label for="menu-toggle" class="close-button" aria-label="Close menu">{{ icon('close') }}</label>
         <nav class="menu-items">
           {% if user %}
             {% if user.admin %}
             <a class="menu-item" href="/users" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Users
+              {{ icon('user', 'menu-icon') }} Users
             </a>
             <a class="menu-item" href="/roles" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9734;</span> Roles
+              {{ icon('roles', 'menu-icon') }} Roles
             </a>
             <a class="menu-item" href="/mailinglists" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9993;</span> Mailing Lists
+              {{ icon('mailinglists', 'menu-icon') }} Mailing Lists
             </a>
             <a class="menu-item" href="/git/repos" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Git
+              {{ icon('git', 'menu-icon') }} Git
             </a>
             <a class="menu-item" href="/domains" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Domains
+              {{ icon('domains', 'menu-icon') }} Domains
             </a>
             {% endif %}
             <a class="menu-item" href="/projects" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Projects
+              {{ icon('projects', 'menu-icon') }} Projects
             </a>
             <a class="menu-item" href="/courses" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Courses
+              {{ icon('courses', 'menu-icon') }} Courses
             </a>
             <a class="menu-item" href="/profile" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Profile
+              {{ icon('profile', 'menu-icon') }} Profile
             </a>
             <a class="menu-item" href="/mail" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9993;</span> Mail
+              {{ icon('mail', 'menu-icon') }} Mail
             </a>
             <a class="menu-item" href="/calendar" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9747;</span> Calendar
+              {{ icon('calendar', 'menu-icon') }} Calendar
             </a>
             <a class="menu-item" href="/contacts" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Contacts
+              {{ icon('contacts', 'menu-icon') }} Contacts
             </a>
             <a class="menu-item" href="/files" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Files
+              {{ icon('files', 'menu-icon') }} Files
             </a>
             <a class="menu-item" href="/sieve" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Filters
+              {{ icon('filters', 'menu-icon') }} Filters
             </a>
             <a class="menu-item" href="/chat" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Chat
+              {{ icon('chat', 'menu-icon') }} Chat
             </a>
             <a class="menu-item" href="/blog" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Blog
+              {{ icon('blog', 'menu-icon') }} Blog
             </a>
             <form class="menu-item" hx-post="/logout" hx-target="#main" hx-swap="innerHTML" onclick="document.getElementById('menu-toggle').checked=false">
               <button type="submit" class="menu-link">
-                <span class="menu-icon" aria-hidden="true">&#8594;</span> Logout
+                {{ icon('logout', 'menu-icon') }} Logout
               </button>
             </form>
           {% else %}
             <a class="menu-item" href="/mailinglists/public" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9993;</span> Mailing Lists
+              {{ icon('mailinglists', 'menu-icon') }} Mailing Lists
             </a>
             <a class="menu-item" href="/blog" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#9733;</span> Blog
+              {{ icon('blog', 'menu-icon') }} Blog
             </a>
             <a class="menu-item" href="/register" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#8595;</span> Register
+              {{ icon('register', 'menu-icon') }} Register
             </a>
             <a class="menu-item" href="/login" onclick="document.getElementById('menu-toggle').checked=false">
-              <span class="menu-icon" aria-hidden="true">&#8594;</span> Login
+              {{ icon('login', 'menu-icon') }} Login
             </a>
           {% endif %}
         </nav>
@@ -105,16 +106,11 @@
     <div class="root">
       <header class="menu-bar">
         <label for="menu-toggle" class="menu-button" aria-label="Open menu">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 6h18M3 12h18M3 18h18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          {{ icon('menu') }}
         </label>
         <a href="/" class="title">Freenit</a>
         <button type="button" class="theme-toggle" id="theme-toggle" title="Toggle theme" aria-label="Toggle theme">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="12" cy="12" r="5" fill="currentColor"/>
-            <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+          {{ icon('sun') }}
         </button>
       </header>
       <main id="main">{{ content | safe }}</main>

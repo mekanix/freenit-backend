@@ -33,7 +33,7 @@ def _current_user():
             from freenit.models import User
 
             config = current_app.config["FREENIT_CONFIG"]
-            return run_async(User.login(email, password, config.secret_key))
+            return run_async(User.login(email, password, config.secret_key, config.ldap))
     return None
 
 

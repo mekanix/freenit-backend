@@ -111,17 +111,16 @@ preload_app = os.getenv("GUNICORN_PRELOAD", "true").lower() in ("true", "1", "ye
 
 
 def on_starting(server):
-    """Validate required production environment variables early."""
-    env = os.getenv("FREENIT_ENV", "production").lower()
-    if env == "production":
-        if not os.getenv("FREENIT_SECRET_KEY"):
-            raise RuntimeError("FREENIT_SECRET_KEY must be set in production.")
-        if not (
-            os.getenv("FREENIT_DBURL")
-            or os.getenv("DATABASE_URL")
-            or os.getenv("FREENIT_PRODUCTION_DBURL")
-        ):
+    """Validate required production configuration early."""
+    from freenit.config import load_config
+
+    config = load_config()
+    if config.environment == "production":
+        if not config.secret_key or config.secret_key == "change-me-in-local-config":
             raise RuntimeError(
-                "A database URL must be set in production. "
-                "Use FREENIT_DBURL, DATABASE_URL, or FREENIT_PRODUCTION_DBURL."
+                "A production secret_key must be set in freenit/local_config.py."
+            )
+        if not config.dburl or config.dburl == "postgresql://user:pass@host/dbname":
+            raise RuntimeError(
+                "A production database URL must be set in freenit/local_config.py."
             )

@@ -1,0 +1,12 @@
+{% macro icon(name, class_name='icon', label=None) -%}
+  {% set names = {
+    'user': 'user-round', 'roles': 'users-round', 'mailinglists': 'mail-plus',
+    'git': 'git-branch', 'domains': 'network', 'projects': 'folder-kanban',
+    'courses': 'graduation-cap', 'profile': 'circle-user-round', 'mail': 'mail',
+    'calendar': 'calendar-days', 'contacts': 'contact-round', 'files': 'folder',
+    'filters': 'list-filter', 'chat': 'message-circle', 'blog': 'book-open',
+    'logout': 'log-out', 'register': 'circle-arrow-down', 'login': 'log-in',
+    'menu': 'menu', 'close': 'x', 'sun': 'sun', 'plus': 'plus'
+  } %}
+  <span class="{{ class_name }}" aria-hidden="{{ 'false' if label else 'true' }}"{% if label %} aria-label="{{ label }}"{% endif %}>{% include "icons/" ~ names[name] ~ ".svg" %}</span>
+{%- endmacro %}

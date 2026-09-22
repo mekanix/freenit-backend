@@ -1,3 +1,4 @@
+{% from "icons.html" import icon %}
 <div class="container">
   <div class="header">
     <h2>{{ board.name }}</h2>
@@ -13,7 +14,7 @@
       {% endfor %}
       <form hx-post="/projects/{{ project.id }}/boards/{{ board.id }}/columns/{{ column.id }}/tasks" hx-target="#main" hx-swap="innerHTML">
         <input type="text" name="title" placeholder="New task" required>
-        <button type="submit" class="button primary small">+</button>
+        <button type="submit" class="button primary small" aria-label="Add task">{{ icon('plus') }}</button>
       </form>
     </div>
     {% endfor %}

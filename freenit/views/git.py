@@ -70,7 +70,8 @@ async def _authenticate() -> str | None:
         return None
     from freenit.models import User
 
-    user = await User.login(email, password, current_app.config["FREENIT_CONFIG"].secret_key)
+    config = current_app.config["FREENIT_CONFIG"]
+    user = await User.login(email, password, config.secret_key, config.ldap)
     return user.email if user else None
 
 

@@ -106,7 +106,7 @@ def _current_user():
             from freenit.db import run_async
 
             config = current_app.config["FREENIT_CONFIG"]
-            user = run_async(User.login(email, password, config.secret_key))
+            user = run_async(User.login(email, password, config.secret_key, config.ldap))
             return user
     return None
 
